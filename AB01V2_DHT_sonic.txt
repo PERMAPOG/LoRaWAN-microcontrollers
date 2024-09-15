@@ -1,0 +1,190 @@
+#include "DHT.h"
+#include "LoRaWanMinimal_APP.h"
+
+#define DHTPIN GPIO1 
+#define DHTTYPE DHT22
+DHT dht(DHTPIN, DHTTYPE); // Initialize the DHT sensor
+
+#define trigPin GPIO0
+#define echoPin GPIO5
+
+#define NODE_333
+
+// LoRaWAN OTAA parameters
+#ifdef NODE_333
+static uint8_t appEui[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+static uint8_t devEui[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+static uint8_t appKey[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+#endif
+
+#ifdef NODE_334
+static uint8_t appEui[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+static uint8_t devEui[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+static uint8_t appKey[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+#endif
+
+
+#ifdef NODE_335
+static uint8_t appEui[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+static uint8_t devEui[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+static uint8_t appKey[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+#endif
+
+uint16_t userChannelsMask[6] = { 0x00FF, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000 };
+
+
+
+
+float duration;
+float distance;
+uint8_t distanceS = 0;
+uint8_t batteryLevel;
+float temperature = 0.0;
+float humidity = 0.0;
+float maxVoltage = 4100.0f;
+float minVoltage = 2930.0f;
+
+unsigned long globalSleepTime = 15000;
+
+//sleep timer data
+TimerEvent_t sleepTimer;
+bool sleepTimerExpired;
+
+void wakeUp() {
+  sleepTimerExpired = true;
+}
+
+void lowPowerSleep(uint32_t sleeptime) {
+  sleepTimerExpired = false;
+  TimerInit(&sleepTimer, &wakeUp);
+  TimerSetValue(&sleepTimer, sleeptime);
+  TimerStart(&sleepTimer);
+  while (!sleepTimerExpired) lowPowerHandler();
+  TimerStop(&sleepTimer);
+}
+
+
+void setup() {
+pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+dht.begin();
+Serial.begin(115200); // Starts the serial communication
+
+if (ACTIVE_REGION == LORAMAC_REGION_US915) {
+    LoRaWAN.setSubBand2();
+  }
+
+  LoRaWAN.begin(LORAWAN_CLASS, ACTIVE_REGION);
+  LoRaWAN.setAdaptiveDR(true);
+
+  while (1) {
+    Serial.print("Joining... ");
+    LoRaWAN.joinOTAA(appEui, appKey, devEui);
+    if (!LoRaWAN.isJoined()) {
+      Serial.println("JOIN FAILED! Sleeping for 30 seconds");
+      lowPowerSleep(30000);
+    } else {
+      Serial.println("JOINED");
+      break;
+    }
+  }
+}
+
+void loop() {
+
+float batteryVoltage = getBatteryVoltage(); // Get battery voltage move towards bottom
+float percent = (batteryVoltage - minVoltage) * 100.0f / (maxVoltage - minVoltage);
+Serial.print("Battery: ");
+Serial.print(batteryVoltage);
+Serial.println(" mV");
+
+ 
+batteryLevel = (uint8_t)percent;
+
+
+Serial.print("Battery Percent: ");
+Serial.print(batteryLevel);
+humidity = dht.readHumidity();
+temperature = dht.readTemperature();
+
+Serial.print("Battery: ");
+Serial.print(batteryVoltage);
+Serial.println(" mV");
+
+Serial.print("Humidity: ");
+Serial.print(humidity);
+Serial.print("%  Temperature: ");
+Serial.print(temperature);
+Serial.println("°C");
+
+
+
+// Clears the trigPin
+digitalWrite(trigPin, LOW);
+delayMicroseconds(2);
+// Sets the trigPin on HIGH state for 10 micro seconds
+digitalWrite(trigPin, HIGH);
+delayMicroseconds(10);
+digitalWrite(trigPin, LOW);
+
+duration = pulseIn(echoPin, HIGH);
+// Calculating the distance
+distance= duration*0.034/2;
+// Prints the distance on the Serial Monitor
+Serial.print("Distance: ");
+Serial.println(distance);
+//distanceS = (uint8_t)distance;
+
+
+// Prepare data array
+uint8_t data[4];
+data[0] = static_cast<uint8_t>(batteryLevel);
+data[1] = static_cast<uint8_t>(distance);
+data[2] = static_cast<uint8_t>(temperature);
+data[3] = static_cast<uint8_t>(humidity);
+
+Serial.printf("\nSending packet with battery level=%d and distance=%d and Temperature=%d and Humidity=%d\n", data[0], data[1], data[2], data[3]);
+
+
+// Send data
+if (LoRaWAN.send(sizeof(data), data, 1, true)) { // Modify as needed for ACK
+  Serial.println("Send OK");
+} else {
+  Serial.println("Send FAILED");
+}
+
+lowPowerSleep(globalSleepTime);
+
+}
+
+void downLinkDataHandle(McpsIndication_t *mcpsIndication) {
+  Serial.printf("Received downlink: %s, RXSIZE %d, PORT %d, DATA: ", mcpsIndication->RxSlot ? "RXWIN2" : "RXWIN1", mcpsIndication->BufferSize, mcpsIndication->Port);
+  for (uint8_t i = 0; i < mcpsIndication->BufferSize; i++) {
+    Serial.printf("%02X", mcpsIndication->Buffer[i]);
+  }
+  Serial.println();
+
+  // Check if we have at least one byte of data to read
+  if (mcpsIndication->BufferSize > 0) {
+    switch (mcpsIndication->Buffer[0]) {
+      case 0x01:
+        globalSleepTime = 10000; // Set sleep time to 10 seconds
+        break;
+      case 0x02:
+        globalSleepTime = 600000; // Set sleep time to 10 min
+        break;
+      case 0x03:
+        globalSleepTime =  3600000; // Set sleep time to 1 hours
+        break;
+      case 0x04:
+        globalSleepTime = 21600000; // 6 hours
+        break;
+      default:
+        // If the data is not 01, 02, or 03, you might want to keep the sleep time unchanged, or set a default
+        break;
+    }
+  }
+}
+
+
