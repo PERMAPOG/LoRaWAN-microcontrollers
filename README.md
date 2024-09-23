@@ -11,7 +11,7 @@ These values need to be updated in the code before uploading it to your LoRaWAN 
 
 
 ## Wiring Diagram
-Below is the wiring diagram for setting up the hardware. This diagram demonstrates the connections needed for the sensors and components used in the TTM node.
+Below is the wiring diagram for setting up the hardware. This diagram demonstrates the connections needed for the HC-SR04 Ultra-sonic Sensor and MT3608 DC-DC booster used in the TTM node.
 
 ![circuit_wiring](https://github.com/user-attachments/assets/f7a3affd-5ec3-4250-bf0b-a2cba2337916)
 
