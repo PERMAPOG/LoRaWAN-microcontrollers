@@ -4,7 +4,7 @@ This repository contains the node code for the TTM system, compatible with the H
 ## Setup Instructions
 To get started, you'll need to upload the code to your HTC device using the Arduino IDE. Ensure that you have the following details ready:
 
-LoRaWAN Device EUI
+LoRaWAN Device EUI\n
 Application Key
 These values need to be updated in the code before uploading it to your LoRaWAN nodes.
 
