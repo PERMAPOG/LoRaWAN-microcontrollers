@@ -1,4 +1,4 @@
-Traveling Trash Man (TTM) Nodes
+#Traveling Trash Man (TTM) Nodes
 This repository contains the node code for the TTM system, compatible with the HTC-AB01v2 and HTC-AB02 LoRaWAN development boards.
 
 Setup Instructions
