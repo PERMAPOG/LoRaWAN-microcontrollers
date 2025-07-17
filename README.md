@@ -1,22 +1,31 @@
-# Traveling Trash Man (TTM) Nodes
-This repository contains the node code for the TTM system, compatible with the HTC-AB01v2 and HTC-AB02 LoRaWAN development boards.
+# 🟢 LoRaWAN-Enabled Microcontroller Trash Monitoring System
 
-## Setup Instructions
-To get started, you'll need to upload the code to your HTC device using the Arduino IDE. Ensure that you have the following details ready:
+This project powers an **IoT Trash Telemetry Monitoring (TTM) system** using **LoRaWAN microcontrollers** (HTC-AB01v2, HTC-AB02) and **ultrasonic sensors** to **remotely monitor fill levels of trash bins**. Data is transmitted to a **Chirpstack LoRaWAN server** for cloud-based visualization and analysis.
 
-- **LoRaWAN Device EUI**
-- **Application Key**
+---
 
-These values need to be updated in the code before uploading it to your LoRaWAN nodes.
+## 📌 Project Highlights
+- 📡 **LoRaWAN Connectivity**: Efficient, long-range data transmission.
+- 🖥️ **Cloud-Connected**: Integrated with **Chirpstack** running on **Docker**.
+- 🧹 **Environmental Impact**: Optimizes waste collection, reduces overflows, cuts down operational costs.
+- 🎛️ **Low-Power Setup**: Uses **HTC-AB01v2/AB02 boards** with **HC-SR04 Ultrasonic Sensor** and **MT3608 DC-DC booster** for energy efficiency.
+- 🛠️ **Rapid Development**: Easily programmable via **Arduino IDE**.
 
+---
 
-## Wiring Diagram
-Below is the wiring diagram for setting up the hardware. This diagram demonstrates the connections needed for the HC-SR04 Ultra-sonic Sensor and MT3608 DC-DC booster used in the TTM node.
+## 📷 System Architecture Diagram
+> _Optional but highly recommended_: Add a simple diagram made in draw.io or diagrams.net showing:
+> Sensor → LoRa Node → Gateway → Chirpstack Server → Dashboard
+>
+> ![circuit_wiring](https://github.com/user-attachments/assets/f7a3affd-5ec3-4250-bf0b-a2cba2337916)
 
-![circuit_wiring](https://github.com/user-attachments/assets/f7a3affd-5ec3-4250-bf0b-a2cba2337916)
+---
 
-## Key Features
-Node Compatibility: Works with HTC-AB01v2 and HTC-AB02.
-LoRaWAN Connectivity: Send trash level data to the gateway using LoRaWAN Protocols.
-Arduino IDE: Easily upload the code via Arduino IDE after entering your unique LoRaWAN credentials.
+## 🚀 Quick Start Guide
+
+### ✅ Prerequisites
+- Arduino IDE installed
+- Board-specific drivers for HTC-AB01v2/AB02
+- LoRaWAN **Device EUI** and **App Key**
+- Chirpstack LoRaWAN Server (Docker)
 
