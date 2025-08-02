@@ -14,7 +14,6 @@ This project powers an **IoT Trash Telemetry Monitoring (TTM) system** using **L
 ---
 
 ## 📷 System Architecture Diagram
-> _Optional but highly recommended_: Add a simple diagram made in draw.io or diagrams.net showing:
 > Sensor → LoRa Node → Gateway → Chirpstack Server → Dashboard
 >
 > ![circuit_wiring](https://github.com/user-attachments/assets/f7a3affd-5ec3-4250-bf0b-a2cba2337916)
